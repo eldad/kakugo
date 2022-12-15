@@ -76,8 +76,13 @@ class ItemSelectionActivity : BaseActivity() {
             menu.add(Menu.NONE, R.id.autoselect, 2, R.string.autoselect_from_kanji)
         }
 
-        menu.add(Menu.NONE, R.id.select_all, 3, R.string.select_all)
-        menu.add(Menu.NONE, R.id.select_none, 4, R.string.select_none)
+        if (mode == Mode.HIRAGANA || mode == Mode.KATAKANA) {
+            menu.add(Menu.NONE, R.id.save_selection, 3, "Save selection")
+            menu.add(Menu.NONE, R.id.load_selection, 4, "Load selection")
+        }
+
+        menu.add(Menu.NONE, R.id.select_all, 5, R.string.select_all)
+        menu.add(Menu.NONE, R.id.select_none, 6, R.string.select_none)
         return true
     }
 
