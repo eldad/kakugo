@@ -11,7 +11,7 @@ android {
     signingConfigs {
         debugconfig {
             keyAlias 'androiddebugkey'
-            storeFile file('/home/blastrock/.android/debug.keystore')
+            storeFile file( System.getenv("HOME") + '/.android/debug.keystore')
             keyPassword 'android'
             storePassword 'android'
         }
