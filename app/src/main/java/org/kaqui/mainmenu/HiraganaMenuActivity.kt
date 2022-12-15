@@ -6,6 +6,7 @@ import org.jetbrains.anko.*
 import org.kaqui.*
 import org.kaqui.model.TestType
 import org.kaqui.settings.ItemSelectionActivity
+import org.kaqui.settings.SelectionMode
 import java.io.Serializable
 
 class HiraganaMenuActivity : BaseActivity() {
@@ -46,7 +47,7 @@ class HiraganaMenuActivity : BaseActivity() {
                         }
                         separator(this@HiraganaMenuActivity).lparams(height = dip(1)) { margin = dip(8) }
                         button(R.string.hiragana_selection) {
-                            setOnClickListener { startActivity<ItemSelectionActivity>("mode" to ItemSelectionActivity.Mode.HIRAGANA as Serializable) }
+                            setOnClickListener { startActivity<ItemSelectionActivity>("mode" to SelectionMode.HIRAGANA as Serializable) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }

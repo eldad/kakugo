@@ -54,6 +54,7 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
         dbView = when (mode) {
             SelectionMode.KANJI -> Database.getInstance(this).getKanjiView()
             SelectionMode.WORD -> Database.getInstance(this).getWordView()
+            else -> throw RuntimeException("cannot open classification for kana")
         }
 
         verticalLayout {
@@ -110,6 +111,7 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
                         .putExtra("mode", when (mode) {
                             SelectionMode.KANJI -> ItemSearchActivity.Mode.KANJI
                             SelectionMode.WORD -> ItemSearchActivity.Mode.WORD
+                            else -> throw RuntimeException("cannot open classification for kana")
                         }))
                 true
             }
@@ -179,8 +181,9 @@ class ClassSelectionActivity : BaseActivity(), CoroutineScope {
 
         startActivity(Intent(this, ItemSelectionActivity::class.java)
                 .putExtra("mode", when (mode) {
-                    SelectionMode.KANJI -> ItemSelectionActivity.Mode.KANJI
-                    SelectionMode.WORD -> ItemSelectionActivity.Mode.WORD
+                    SelectionMode.KANJI -> mode
+                    SelectionMode.WORD -> mode
+                    else -> throw RuntimeException("cannot open classification for kana")
                 } as Serializable)
                 .putExtra("classifier", classifier))
     }

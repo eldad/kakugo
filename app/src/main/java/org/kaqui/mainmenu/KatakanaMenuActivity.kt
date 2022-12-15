@@ -6,6 +6,7 @@ import org.jetbrains.anko.*
 import org.kaqui.*
 import org.kaqui.model.TestType
 import org.kaqui.settings.ItemSelectionActivity
+import org.kaqui.settings.SelectionMode
 import java.io.Serializable
 
 class KatakanaMenuActivity : BaseActivity() {
@@ -46,7 +47,7 @@ class KatakanaMenuActivity : BaseActivity() {
                         }
                         separator(this@KatakanaMenuActivity).lparams(height = dip(1)) { margin = dip(8) }
                         button(R.string.katakana_selection) {
-                            setOnClickListener { startActivity<ItemSelectionActivity>("mode" to ItemSelectionActivity.Mode.KATAKANA as Serializable) }
+                            setOnClickListener { startActivity<ItemSelectionActivity>("mode" to SelectionMode.KATAKANA as Serializable) }
                         }.lparams(width = matchParent, height = wrapContent) {
                             margin = dip(4)
                         }

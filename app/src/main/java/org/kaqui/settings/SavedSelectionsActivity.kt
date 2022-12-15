@@ -27,6 +27,8 @@ class SavedSelectionsActivity : BaseActivity() {
             adapter = SavedSelectionsAdapter(this@SavedSelectionsActivity, when (mode) {
                 SelectionMode.KANJI -> db.listKanjiSelections()
                 SelectionMode.WORD -> db.listWordSelections()
+                SelectionMode.HIRAGANA -> db.listKanaSelections(Database.KANAS_TYPE_HIRAGANA)
+                SelectionMode.KATAKANA -> db.listKanaSelections(Database.KANAS_TYPE_KATAKANA)
             })
             onItemClickListener = AdapterView.OnItemClickListener(this@SavedSelectionsActivity::onListItemClick)
         }
@@ -41,6 +43,8 @@ class SavedSelectionsActivity : BaseActivity() {
         when (mode) {
             SelectionMode.KANJI -> db.restoreKanjiSelectionFrom(id)
             SelectionMode.WORD -> db.restoreWordSelectionFrom(id)
+            SelectionMode.HIRAGANA -> db.restoreKanaSelectionFrom(Database.KANAS_TYPE_HIRAGANA, id)
+            SelectionMode.KATAKANA -> db.restoreKanaSelectionFrom(Database.KANAS_TYPE_KATAKANA, id)
         }
 
         toast(getString(R.string.loaded_selection, item.name))
@@ -65,11 +69,15 @@ class SavedSelectionsActivity : BaseActivity() {
                 when (mode) {
                     SelectionMode.KANJI -> db.deleteKanjiSelection(selectedItem!!.id)
                     SelectionMode.WORD -> db.deleteWordSelection(selectedItem!!.id)
+                    SelectionMode.HIRAGANA -> db.deleteKanaSelection(selectedItem!!.id)
+                    SelectionMode.KATAKANA -> db.deleteKanaSelection(selectedItem!!.id)
                 }
                 val adapter = (listView.adapter as SavedSelectionsAdapter)
                 adapter.savedSelections = when (mode) {
                     SelectionMode.KANJI -> db.listKanjiSelections()
                     SelectionMode.WORD -> db.listWordSelections()
+                    SelectionMode.HIRAGANA -> db.listKanaSelections(Database.KANAS_TYPE_HIRAGANA)
+                    SelectionMode.KATAKANA -> db.listKanaSelections(Database.KANAS_TYPE_KATAKANA)
                 }
                 adapter.notifyDataSetChanged()
                 toast(getString(R.string.deleted_selection, selectedItem!!.name))

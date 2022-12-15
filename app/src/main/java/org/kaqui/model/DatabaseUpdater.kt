@@ -117,6 +117,20 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         + ")")
 
         database.execSQL(
+                "CREATE TABLE IF NOT EXISTS ${Database.KANAS_ITEM_SELECTION_TABLE_NAME} ("
+                        + "id_selection INTEGER NOT NULL REFERENCES kanas_selections(id),"
+                        + "id_kana INTEGER NOT NULL REFERENCES kanas(id),"
+                        + "PRIMARY KEY(id_selection, id_kana)"
+                        + ")")
+
+        database.execSQL(
+                "CREATE TABLE IF NOT EXISTS ${Database.KANAS_SELECTION_TABLE_NAME} ("
+                        + "id_selection INTEGER NOT NULL PRIMARY KEY,"
+                        + "name TEXT NOT NULL,"
+                        + "type INTEGER NOT NULL"
+                        + ")")
+
+        database.execSQL(
                 "CREATE TABLE IF NOT EXISTS ${Database.ITEM_SCORES_TABLE_NAME} ("
                         + "id INTEGER NOT NULL,"
                         + "type INTEGER NOT NULL,"
@@ -176,6 +190,8 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
                         oldVersion < 19 -> dumpUserDataV18()
                         oldVersion < 21 -> dumpUserDataV20()
                         oldVersion < 22 -> dumpUserDataV21()
+                        // TODO
+                        // oldVersion < 26 -> dumpUserDataV25()
                         oldVersion > DATABASE_VERSION -> throw RuntimeException("reverting to an old version of the app is not supported")
                         else -> dumpUserData()
                     }
@@ -192,6 +208,8 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
             database.execSQL("DROP TABLE IF EXISTS main.${Database.KANJIS_COMPOSITION_TABLE_NAME}")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.KANJIS_TABLE_NAME}")
             database.execSQL("DROP TABLE IF EXISTS main.${Database.KANAS_TABLE_NAME}")
+            database.execSQL("DROP TABLE IF EXISTS main.${Database.KANAS_SELECTION_TABLE_NAME}")
+            database.execSQL("DROP TABLE IF EXISTS main.${Database.KANAS_ITEM_SELECTION_TABLE_NAME}")
             database.execSQL("DROP TABLE IF EXISTS main.hiraganas")
             database.execSQL("DROP TABLE IF EXISTS main.similar_hiraganas")
             database.execSQL("DROP TABLE IF EXISTS main.hiragana_strokes")
@@ -805,7 +823,7 @@ class DatabaseUpdater(private val database: SQLiteDatabase, private val dictDb: 
 
     companion object {
         const val TAG = "DatabaseUpdater"
-        const val DATABASE_VERSION = 24
+        const val DATABASE_VERSION = 25
 
         fun databaseNeedsUpdate(context: Context): Boolean {
             try {

@@ -517,12 +517,85 @@ class Database private constructor(context: Context, private val database: SQLit
         return stats
     }
 
+    fun saveKanaSelectionTo(kanaType: Int, name: String) {
+        val rangeFirst = if (kanaType == KANAS_TYPE_HIRAGANA) HiraganaRange.first else KatakanaRange.first
+        val rangeLast = if (kanaType == KANAS_TYPE_HIRAGANA) HiraganaRange.last else KatakanaRange.last
+
+        database.transaction {
+            val idSelection = database.query(KANAS_SELECTION_TABLE_NAME, arrayOf("id_selection"), "name = ?", arrayOf(name), null, null, null).use { cursor ->
+                if (cursor.count == 0) {
+                    val cv = ContentValues()
+                    cv.put("name", name)
+                    cv.put("type", kanaType)
+                    return@use database.insert(KANAS_SELECTION_TABLE_NAME, null, cv)
+                } else {
+                    cursor.moveToFirst()
+                    return@use cursor.getInt(0)
+                }
+            }
+            database.delete(KANAS_ITEM_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
+            database.execSQL("""
+            INSERT INTO $KANAS_ITEM_SELECTION_TABLE_NAME (id_selection, id_kana)
+            SELECT ?, id FROM $KANAS_TABLE_NAME WHERE enabled = 1 AND id BETWEEN $rangeFirst AND $rangeLast
+            """, arrayOf(idSelection.toString()))
+        }
+    }
+
+    fun restoreKanaSelectionFrom(kanaType: Int, idSelection: Long) {
+        val rangeFirst = if (kanaType == KANAS_TYPE_HIRAGANA) HiraganaRange.first else KatakanaRange.first
+        val rangeLast = if (kanaType == KANAS_TYPE_HIRAGANA) HiraganaRange.last else KatakanaRange.last
+
+        database.transaction {
+            database.execSQL("""
+                UPDATE $KANAS_TABLE_NAME
+                SET enabled = 0
+                WHERE id BETWEEN $rangeFirst AND $rangeLast
+                """)
+            database.execSQL("""
+                UPDATE $KANAS_TABLE_NAME
+                SET enabled = 1
+                WHERE id IN (
+                    SELECT id_kana
+                    FROM $KANAS_ITEM_SELECTION_TABLE_NAME
+                    WHERE id_selection = ?
+                )
+                """, arrayOf(idSelection.toString()))
+        }
+    }
+
+    fun listKanaSelections(kanaType: Int): List<SavedSelection> {
+        val out = mutableListOf<SavedSelection>()
+        database.rawQuery("""
+            SELECT id_selection, name, (
+                SELECT COUNT(*)
+                FROM $KANAS_ITEM_SELECTION_TABLE_NAME ss WHERE ss.id_selection = s.id_selection
+            )
+            FROM $KANAS_SELECTION_TABLE_NAME s
+            WHERE type = $kanaType
+            """, arrayOf()).use { cursor ->
+            while (cursor.moveToNext())
+                out.add(SavedSelection(cursor.getLong(0), cursor.getString(1), cursor.getInt(2)))
+        }
+        return out
+    }
+
+    fun deleteKanaSelection(idSelection: Long) {
+        database.transaction {
+            database.delete(KANAS_ITEM_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
+            database.delete(KANAS_SELECTION_TABLE_NAME, "id_selection = ?", arrayOf(idSelection.toString()))
+        }
+    }
+
     companion object {
         private const val TAG = "Database"
 
         const val DATABASE_NAME = "kanjis"
 
         const val KANAS_TABLE_NAME = "kanas"
+        const val KANAS_SELECTION_TABLE_NAME = "kanas_selection"
+        const val KANAS_ITEM_SELECTION_TABLE_NAME = "kanas_item_selection"
+        const val KANAS_TYPE_HIRAGANA = 0
+        const val KANAS_TYPE_KATAKANA = 1
 
         const val KANJIS_TABLE_NAME = "kanjis"
         const val KANJIS_COMPOSITION_TABLE_NAME = "kanjis_composition"
